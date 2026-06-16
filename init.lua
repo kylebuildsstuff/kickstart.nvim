@@ -596,6 +596,11 @@ end
 -- and: brew install luarocks && luarocks install magick)
 -- ============================================================
 do
+  local luarocks_path = vim.fn.expand('~/.luarocks/share/lua/5.1')
+  local luarocks_cpath = vim.fn.expand('~/.luarocks/lib/lua/5.1')
+  package.path = package.path .. ';' .. luarocks_path .. '/?.lua;' .. luarocks_path .. '/?/init.lua'
+  package.cpath = package.cpath .. ';' .. luarocks_cpath .. '/?.so'
+
   vim.pack.add { gh '3rd/image.nvim' }
   pcall(require('image').setup, {
     backend = 'kitty',
