@@ -445,6 +445,12 @@ do
   ---@diagnostic disable-next-line: duplicate-set-field
   statusline.section_location = function() return '%2l:%-2v' end
 
+    -- Git side-by-side diffs (like VSCode Ctrl+G)
+  vim.pack.add { gh 'sindrets/diffview.nvim' }
+  require('diffview').setup {}
+
+  vim.keymap.set('n', '<C-g>', '<cmd>DiffviewOpen<cr>', { desc = 'Open side-by-side diffs' })
+
   -- ... and there is more!
   --  Check out: https://github.com/nvim-mini/mini.nvim
 end
@@ -582,6 +588,28 @@ do
 
   -- Shortcut for searching your Neovim configuration files
   vim.keymap.set('n', '<leader>sn', function() builtin.find_files { cwd = vim.fn.stdpath 'config', follow = true } end, { desc = '[S]earch [N]eovim files' })
+end
+
+-- ============================================================
+-- SECTION 5b: IMAGE PREVIEW
+-- Inline image rendering (requires kitty graphics protocol terminal
+-- and: brew install luarocks && luarocks install magick)
+-- ============================================================
+do
+  vim.pack.add { gh '3rd/image.nvim' }
+  pcall(require('image').setup, {
+    backend = 'kitty',
+    max_width = 100,
+    max_height = 12,
+    max_width_window_percentage = math.huge,
+    max_height_window_percentage = math.huge,
+    integrations = {
+      telescope = {
+        enabled = true,
+        preview_title = 'Image Preview',
+      },
+    },
+  })
 end
 
 -- ============================================================
