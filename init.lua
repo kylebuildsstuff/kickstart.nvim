@@ -792,7 +792,7 @@ do
   -- You can press `g?` for help in this menu.
   local ensure_installed = vim.tbl_keys(servers or {})
   vim.list_extend(ensure_installed, {
-    -- You can add other tools here that you want Mason to install
+    'prettierd', -- Used to format JS/TS/CSS/HTML/JSON/YAML/Markdown/etc (formatting is done by conform.nvim)
   })
 
   require('mason-tool-installer').setup { ensure_installed = ensure_installed }
@@ -810,6 +810,37 @@ end
 do
   -- [[ Formatting ]]
   vim.pack.add { gh 'stevearc/conform.nvim' }
+
+  -- Filetypes that conform hands off to Prettier (via prettierd, falling back to prettier)
+  local prettier_filetypes = {
+    'javascript',
+    'javascriptreact',
+    'typescript',
+    'typescriptreact',
+    'vue',
+    'css',
+    'less',
+    'scss',
+    'html',
+    'json',
+    'jsonc',
+    'yaml',
+    'markdown',
+    'markdown.mdx',
+    'graphql',
+    'handlebars',
+  }
+
+  local formatters_by_ft = {
+    -- rust = { 'rustfmt' },
+    -- Conform can also run multiple formatters sequentially
+    -- python = { "isort", "black" },
+  }
+  for _, ft in ipairs(prettier_filetypes) do
+    -- 'stop_after_first' runs the first available formatter from the list
+    formatters_by_ft[ft] = { 'prettierd', 'prettier', stop_after_first = true }
+  end
+
   require('conform').setup {
     notify_on_error = false,
     format_on_save = function(bufnr)
@@ -818,6 +849,9 @@ do
         -- lua = true,
         -- python = true,
       }
+      for _, ft in ipairs(prettier_filetypes) do
+        enabled_filetypes[ft] = true
+      end
       if enabled_filetypes[vim.bo[bufnr].filetype] then
         return { timeout_ms = 500 }
       else
@@ -828,14 +862,7 @@ do
       lsp_format = 'fallback', -- Use external formatters if configured below, otherwise use LSP formatting. Set to `false` to disable LSP formatting entirely.
     },
     -- You can also specify external formatters in here.
-    formatters_by_ft = {
-      -- rust = { 'rustfmt' },
-      -- Conform can also run multiple formatters sequentially
-      -- python = { "isort", "black" },
-      --
-      -- You can use 'stop_after_first' to run the first available formatter from the list
-      -- javascript = { "prettierd", "prettier", stop_after_first = true },
-    },
+    formatters_by_ft = formatters_by_ft,
   }
 
   vim.keymap.set({ 'n', 'v' }, '<leader>f', function() require('conform').format { async = true } end, { desc = '[F]ormat buffer' })
