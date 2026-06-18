@@ -456,6 +456,38 @@ do
 end
 
 -- ============================================================
+-- SECTION 4b: FILE EXPLORER
+-- neo-tree as the file explorer, replacing the built-in netrw
+-- ============================================================
+do
+  -- Disable netrw entirely so neo-tree owns file/directory browsing
+  vim.g.loaded_netrw = 1
+  vim.g.loaded_netrwPlugin = 1
+
+  -- neo-tree requires both plenary (lua utilities) and nui (UI components)
+  vim.pack.add {
+    gh 'nvim-lua/plenary.nvim',
+    gh 'MunifTanjim/nui.nvim',
+    gh 'nvim-neo-tree/neo-tree.nvim',
+  }
+
+  require('neo-tree').setup {
+    filesystem = {
+      -- Open neo-tree when editing a directory (e.g. `nvim .`) instead of netrw
+      hijack_netrw_behavior = 'open_current',
+      window = {
+        mappings = {
+          ['\\'] = 'close_window',
+        },
+      },
+    },
+  }
+
+  vim.keymap.set('n', '\\', '<Cmd>Neotree reveal<CR>', { desc = 'NeoTree reveal', silent = true })
+  vim.keymap.set('n', '<leader>e', '<Cmd>Neotree toggle<CR>', { desc = 'NeoTree [E]xplorer toggle', silent = true })
+end
+
+-- ============================================================
 -- SECTION 5: SEARCH & NAVIGATION
 -- Telescope setup, keymaps, LSP picker mappings
 -- ============================================================
@@ -1030,7 +1062,6 @@ do
   -- require 'kickstart.plugins.indent_line'
   -- require 'kickstart.plugins.lint'
   -- require 'kickstart.plugins.autopairs'
-  -- require 'kickstart.plugins.neo-tree'
   -- require 'kickstart.plugins.gitsigns' -- adds gitsigns recommended keymaps
 
   -- NOTE: You can add your own plugins, configuration, etc from `lua/custom/plugins/*.lua`
