@@ -770,6 +770,15 @@ do
 
     stylua = {}, -- Used to format Lua code
 
+    -- Sui Move language server: official MystenLabs move-analyzer (sui-move-lsp),
+    -- built from the tag matching the installed sui CLI. Explicit cmd + custom key
+    -- so it isn't auto-installed via Mason.
+    sui_move_analyzer = {
+      cmd = { vim.fn.expand '~/.cargo/bin/move-analyzer' },
+      filetypes = { 'move' },
+      root_markers = { 'Move.toml', '.git' },
+    },
+
     -- Special Lua Config, as recommended by neovim help docs
     lua_ls = {
       on_init = function(client)
@@ -822,7 +831,10 @@ do
   --    :Mason
   --
   -- You can press `g?` for help in this menu.
-  local ensure_installed = vim.tbl_keys(servers or {})
+  -- sui_move_analyzer is installed out-of-band (cargo), not via Mason
+  local ensure_installed = vim.tbl_filter(function(name)
+    return name ~= 'sui_move_analyzer'
+  end, vim.tbl_keys(servers or {}))
   vim.list_extend(ensure_installed, {
     'prettierd', -- Used to format JS/TS/CSS/HTML/JSON/YAML/Markdown/etc (formatting is done by conform.nvim)
   })
@@ -986,6 +998,12 @@ end
 -- SECTION 9: TREESITTER
 -- Parser installation, syntax highlighting, folds, indentation
 -- ============================================================
+do
+  -- Sui Move syntax highlighting (Move 2024 edition). `.move` is detected as
+  -- filetype `move`, but nvim-treesitter has no `move` parser and move-analyzer
+  -- provides no semantic tokens, so this syntax plugin supplies the colors.
+  vim.pack.add { { src = gh 'yanganto/move.vim', version = 'sui-move' } }
+end
 do
   -- [[ Configure Treesitter ]]
   --  Used to highlight, edit, and navigate code
